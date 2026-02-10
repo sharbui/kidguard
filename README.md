@@ -206,7 +206,7 @@ Claude analyzes captured content for:
 
 ```bash
 # Clone the repo
-git clone https://github.com/[username]/kidguard.git
+git clone https://github.com/sharbui/kidguard.git
 cd kidguard
 
 # Install dependencies
@@ -223,7 +223,7 @@ python web_ui.py
 
 ```bash
 # Clone the repo
-git clone https://github.com/[username]/kidguard.git
+git clone https://github.com/sharbui/kidguard.git
 cd kidguard
 
 # Install dependencies
