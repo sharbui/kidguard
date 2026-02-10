@@ -1,0 +1,225 @@
+# KidGuard Configuration
+# Copy this file to config.yaml and fill in your settings
+
+# Claude API
+claude:
+  api_key: "your-claude-api-key"
+  model: "claude-opus-4-5"  # or claude-sonnet-4-5 for faster response
+
+# Family members (for face recognition)
+family:
+  - name: "小雞"
+    age: 8
+    is_child: true
+    # face_encoding will be generated during setup
+  - name: "鴨鴨"
+    age: 6
+    is_child: true
+  - name: "臭魚"
+    age: 4
+    is_child: true
+  - name: "爸爸"
+    age: 35
+    is_child: false
+  - name: "媽媽"
+    age: 33
+    is_child: false
+
+# Detection rules
+rules:
+  # Age threshold for protection
+  max_child_age: 12
+  
+  # What to do when inappropriate content detected
+  action: "redirect"  # skip | redirect | pause | notify_only
+  
+  # How often to check content (seconds)
+  check_interval: 30
+  
+  # Clip duration for analysis (seconds)
+  clip_duration: 5
+
+# Safe channels (YouTube channel IDs)
+safe_channels:
+  - id: "UCX6OQ3DkcsbYNE6H8uQQuVA"
+    name: "MrBeast"
+  - id: "UC295-Dw_tDNtZXFeAPAQKEw"
+    name: "Cocomelon"
+  - id: "UCkQO3QsgTpNTsOw6ujimT5Q"
+    name: "Blippi"
+  - id: "UC4PooiX37Pld1T8J5SYT-SQ"
+    name: "Numberblocks"
+
+# Content analysis settings
+analysis:
+  # Categories to block
+  block_categories:
+    - violence
+    - horror
+    - adult
+    - drugs
+    - gambling
+
+  # Categories to warn (log but don't block)
+  warn_categories:
+    - excessive_consumerism
+    - clickbait
+    - loud_content
+
+  # Confidence threshold (0-1)
+  confidence_threshold: 0.7
+
+  # ===== 家長自定義規則 (Parent Custom Rules) =====
+  custom_rules:
+    # 語言限制 (Language restrictions)
+    language:
+      enabled: true
+      # 只允許這些語言 (empty = allow all)
+      allowed_languages:
+        - "中文"           # Chinese
+        - "英文"           # English
+        # - "日文"         # Japanese
+        # - "韓文"         # Korean
+        # - "西班牙文"     # Spanish
+      # 偵測到非允許語言時的動作
+      action: "block"      # block | warn | redirect
+      reason: "非家長允許的語言內容"
+
+    # 動作行為限制 (Action/Behavior restrictions)
+    actions:
+      enabled: true
+      # 禁止的動作類型
+      blocked_actions:
+        - type: "砍擊揮砍"
+          description: "持刀劍等武器進行砍擊、揮砍的動作"
+          keywords: ["sword fighting", "slashing", "chopping", "刀劍", "砍殺"]
+          severity: "high"
+
+        - type: "拳打腳踢"
+          description: "近身格鬥、打鬥場景"
+          keywords: ["fighting", "punching", "kicking", "格鬥", "打架"]
+          severity: "high"
+
+        - type: "危險特技"
+          description: "高空跳躍、危險動作可能被模仿"
+          keywords: ["dangerous stunts", "jumping", "parkour", "特技", "跳樓"]
+          severity: "medium"
+
+        - type: "破壞行為"
+          description: "故意破壞物品、砸東西"
+          keywords: ["destruction", "smashing", "breaking things", "破壞", "砸東西"]
+          severity: "medium"
+
+      action: "block"      # 偵測到時的處理方式
+
+    # 聲音表現限制 (Audio/Sound restrictions)
+    audio:
+      enabled: true
+      blocked_audio_types:
+        - type: "尖叫"
+          description: "高分貝尖叫、恐怖音效"
+          keywords: ["screaming", "shrieking", "尖叫", "慘叫"]
+          severity: "high"
+
+        - type: "誇張大叫"
+          description: "過度誇張的叫喊、噪音"
+          keywords: ["yelling", "shouting loudly", "大叫", "吼叫"]
+          severity: "medium"
+
+        - type: "粗俗言語"
+          description: "髒話、不雅用語"
+          keywords: ["profanity", "swearing", "curse words", "髒話", "三字經"]
+          severity: "high"
+
+      action: "block"
+
+    # 視覺風格限制 (Visual style restrictions)
+    visual:
+      enabled: true
+      blocked_styles:
+        - type: "血腥畫面"
+          description: "血液、傷口、屍體等畫面"
+          severity: "high"
+
+        - type: "陰暗恐怖"
+          description: "黑暗、陰森、恐怖的視覺風格"
+          severity: "high"
+
+        - type: "過度閃爍"
+          description: "快速閃爍可能引發不適"
+          severity: "medium"
+
+        - type: "性感暴露"
+          description: "不適當的服裝或姿勢"
+          severity: "high"
+
+      action: "block"
+
+    # 主題內容限制 (Content theme restrictions)
+    themes:
+      enabled: true
+      blocked_themes:
+        - "賭博遊戲"        # Gambling
+        - "戀愛交往"        # Dating/Romance
+        - "校園霸凌"        # Bullying
+        - "犯罪行為"        # Crime
+        - "超自然靈異"      # Supernatural/Ghost
+        - "開箱炫富"        # Unboxing/Showing off wealth
+        - "惡作劇整人"      # Pranks
+      action: "block"
+
+    # 年齡分級覆寫 (Age rating override)
+    age_rating:
+      enabled: true
+      # 即使YouTube標示為兒童內容，仍要檢查是否符合家長標準
+      verify_youtube_kids: true
+      # 允許的年齡分級 (覆寫YouTube自己的分級)
+      max_rating: "G"      # G | PG | PG-13 | R
+
+    # 自定義關鍵字黑名單 (Custom keyword blacklist)
+    keywords:
+      enabled: true
+      # 標題或描述中包含這些關鍵字就封鎖
+      blocked_keywords:
+        - "鬼"
+        - "靈異"
+        - "恐怖"
+        - "血腥"
+        - "殺人"
+        - "18+"
+        - "成人"
+        # 可自行添加...
+      action: "block"
+
+# Notifications
+notifications:
+  enabled: true
+  
+  telegram:
+    enabled: true
+    bot_token: "your-telegram-bot-token"
+    chat_id: "your-chat-id"
+    
+  # Include screenshot in notification
+  include_screenshot: true
+  
+  # Only notify for blocked content (not warnings)
+  block_only: false
+
+# Privacy settings
+privacy:
+  # Delete clips after analysis
+  delete_clips: true
+  
+  # Don't log video URLs
+  anonymize_logs: false
+  
+  # Local face recognition only (no cloud)
+  local_only: true
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG | INFO | WARNING | ERROR
+  file: "logs/kidguard.log"
+  max_size_mb: 10
+  backup_count: 5

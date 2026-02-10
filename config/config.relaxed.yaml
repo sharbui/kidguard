@@ -1,0 +1,166 @@
+# KidGuard 寬鬆模式配置範例
+# 適合年齡：10-12 歲
+# 特點：給予較多自由度，但仍過濾明顯不當內容
+
+# Claude API
+claude:
+  api_key: "your-claude-api-key"
+  model: "claude-sonnet-4-5"  # 速度更快、成本更低
+
+# 家庭成員
+family:
+  - name: "小雞"
+    age: 11
+    is_child: true
+  - name: "爸爸"
+    age: 35
+    is_child: false
+  - name: "媽媽"
+    age: 33
+    is_child: false
+
+# 偵測規則
+rules:
+  max_child_age: 12
+  action: "notify_only"  # 較年長的孩子，主要是通知家長
+  check_interval: 60  # 每分鐘檢查一次
+  clip_duration: 5
+
+# 安全頻道（較寬鬆，包含教育和娛樂）
+safe_channels:
+  - id: "UCX6OQ3DkcsbYNE6H8uQQuVA"
+    name: "MrBeast"
+  - id: "UC295-Dw_tDNtZXFeAPAQKEw"
+    name: "Cocomelon"
+  - id: "UCkQO3QsgTpNTsOw6ujimT5Q"
+    name: "Numberblocks"
+
+# 內容分析設定
+analysis:
+  # 只封鎖嚴重類別
+  block_categories:
+    - horror
+    - adult
+    - drugs
+
+  # 更多類別只警告不封鎖
+  warn_categories:
+    - violence  # 暴力只警告（卡通打鬥可接受）
+    - gambling
+    - excessive_consumerism
+    - clickbait
+    - loud_content
+
+  # 較高信心閾值（避免誤判）
+  confidence_threshold: 0.8
+
+  # ===== 家長自定義規則 =====
+  custom_rules:
+    # 語言限制：中英文都可以
+    language:
+      enabled: true
+      allowed_languages:
+        - "中文"
+        - "英文"
+      action: "warn"  # 只警告不阻擋
+      reason: "偵測到其他語言內容"
+
+    # 動作限制：只限制極端暴力
+    actions:
+      enabled: true
+      blocked_actions:
+        - type: "真實武器使用"
+          description: "真人使用真實武器（非卡通）"
+          keywords: ["real weapons", "gun violence", "真槍", "實彈"]
+          severity: "high"
+
+        - type: "極端危險動作"
+          description: "可能導致嚴重傷害的危險動作"
+          keywords: ["life-threatening", "extreme danger", "極度危險"]
+          severity: "high"
+
+      action: "block"
+
+    # 聲音限制：只限制極端情況
+    audio:
+      enabled: true
+      blocked_audio_types:
+        - type: "恐怖尖叫"
+          description: "驚悚片類型的恐怖尖叫"
+          keywords: ["horror screaming", "terror", "恐怖尖叫"]
+          severity: "high"
+
+        - type: "嚴重粗俗言語"
+          description: "極度不雅的髒話"
+          keywords: ["extreme profanity", "F-word", "重度髒話"]
+          severity: "high"
+
+      action: "warn"  # 只警告
+
+    # 視覺風格限制：只限制極端情況
+    visual:
+      enabled: true
+      blocked_styles:
+        - type: "極度血腥"
+          description: "大量血液、嚴重傷口"
+          severity: "high"
+
+        - type: "明顯色情"
+          description: "裸露或色情暗示"
+          severity: "high"
+
+      action: "block"
+
+    # 主題內容限制：較寬鬆
+    themes:
+      enabled: true
+      blocked_themes:
+        - "賭博遊戲"
+        - "成人內容"
+        - "毒品相關"
+        - "犯罪教學"  # 注意：不包含犯罪劇情（如偵探片）
+      action: "block"
+
+    # 年齡分級：允許到 PG-13
+    age_rating:
+      enabled: true
+      verify_youtube_kids: false  # 信任 YouTube Kids 的分級
+      max_rating: "PG-13"
+
+    # 關鍵字黑名單：精簡版
+    keywords:
+      enabled: true
+      blocked_keywords:
+        # 只限制明顯不當內容
+        - "18+"
+        - "成人片"
+        - "色情"
+        - "限制級"
+        - "賭博網站"
+        - "毒品"
+      action: "block"
+
+# 通知設定
+notifications:
+  enabled: true
+
+  telegram:
+    enabled: true
+    bot_token: "your-telegram-bot-token"
+    chat_id: "your-chat-id"
+
+  include_screenshot: true
+  block_only: true  # 只有真正封鎖時才通知（避免過多通知）
+
+# 隱私設定
+privacy:
+  delete_clips: true
+  anonymize_logs: false
+  local_only: true
+
+# 日誌設定
+logging:
+  level: "INFO"
+  file: "logs/kidguard.log"
+  max_size_mb: 10
+  backup_count: 5

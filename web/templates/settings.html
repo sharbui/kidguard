@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ KidGuard - 家長設定</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🛡️ KidGuard 家長控制面板</h1>
+            <p class="subtitle">保護您的孩子免受不當內容影響</p>
+        </header>
+
+        <!-- Status Bar -->
+        <div class="status-bar" id="statusBar">
+            <span class="status-text" id="statusText">準備就緒</span>
+        </div>
+
+        <!-- Tab Navigation -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="basic">🔧 基本設定</button>
+            <button class="tab-btn" data-tab="family">👨‍👩‍👧‍👦 家庭成員</button>
+            <button class="tab-btn" data-tab="custom-rules">🎯 自定義規則</button>
+            <button class="tab-btn" data-tab="notifications">📱 通知設定</button>
+            <button class="tab-btn" data-tab="templates">📋 快速模板</button>
+        </nav>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Basic Settings Tab -->
+            <div class="tab-panel active" id="basic">
+                <h2>基本設定</h2>
+
+                <div class="section">
+                    <h3>Claude API 配置</h3>
+                    <div class="form-group">
+                        <label for="apiKey">API Key *</label>
+                        <input type="password" id="apiKey" placeholder="sk-ant-api03-...">
+                        <button class="btn-small" onclick="testClaudeAPI()">測試連接</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="model">模型選擇</label>
+                        <select id="model">
+                            <option value="claude-opus-4-6">Claude Opus 4.6 (最強大)</option>
+                            <option value="claude-sonnet-4-5" selected>Claude Sonnet 4.5 (推薦)</option>
+                            <option value="claude-haiku-4-5">Claude Haiku 4.5 (最快速)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>檢測規則</h3>
+                    <div class="form-group">
+                        <label for="maxChildAge">保護年齡上限</label>
+                        <input type="number" id="maxChildAge" value="12" min="1" max="18">
+                        <span class="help-text">年齡在此數值以下的家庭成員將受到保護</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="action">偵測到不當內容時</label>
+                        <select id="action">
+                            <option value="redirect">重導向到安全頻道</option>
+                            <option value="skip">跳過影片</option>
+                            <option value="pause">暫停播放</option>
+                            <option value="notify_only">僅通知家長</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="checkInterval">檢查間隔（秒）</label>
+                        <input type="number" id="checkInterval" value="30" min="10" max="300">
+                        <span class="help-text">每隔多久檢查一次內容</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="confidenceThreshold">信心閾值</label>
+                        <input type="range" id="confidenceThreshold" min="0" max="1" step="0.1" value="0.7">
+                        <span id="confidenceValue">0.7</span>
+                        <span class="help-text">較低 = 更嚴格，較高 = 較寬鬆</span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>安全頻道白名單</h3>
+                    <div id="safeChannelsList"></div>
+                    <button class="btn-secondary" onclick="addSafeChannel()">+ 添加安全頻道</button>
+                </div>
+            </div>
+
+            <!-- Family Members Tab -->
+            <div class="tab-panel" id="family">
+                <h2>家庭成員管理</h2>
+                <p class="help-text">添加家庭成員以啟用臉部識別功能</p>
+
+                <div id="familyMembersList"></div>
+
+                <button class="btn-secondary" onclick="addFamilyMember()">+ 添加家庭成員</button>
+            </div>
+
+            <!-- Custom Rules Tab -->
+            <div class="tab-panel" id="custom-rules">
+                <h2>自定義過濾規則</h2>
+                <p class="help-text">根據您的育兒理念自定義內容過濾規則</p>
+
+                <!-- Language Rules -->
+                <div class="section collapsible">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3>🌍 語言限制</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="languageEnabled">
+                                啟用語言限制
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>允許的語言</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" class="allowed-language" value="中文"> 中文</label>
+                                <label><input type="checkbox" class="allowed-language" value="英文"> 英文</label>
+                                <label><input type="checkbox" class="allowed-language" value="日文"> 日文</label>
+                                <label><input type="checkbox" class="allowed-language" value="韓文"> 韓文</label>
+                                <label><input type="checkbox" class="allowed-language" value="西班牙文"> 西班牙文</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>違規處理</label>
+                            <select id="languageAction">
+                                <option value="block">阻擋</option>
+                                <option value="warn">警告</option>
+                                <option value="redirect">重導向</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Rules -->
+                <div class="section collapsible">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3>🤺 動作行為限制</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="actionsEnabled">
+                                啟用動作限制
+                            </label>
+                        </div>
+                        <div id="blockedActionsList"></div>
+                        <button class="btn-small" onclick="addBlockedAction()">+ 添加動作限制</button>
+                    </div>
+                </div>
+
+                <!-- Audio Rules -->
+                <div class="section collapsible">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3>🔊 聲音表現限制</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="audioEnabled">
+                                啟用聲音限制
+                            </label>
+                        </div>
+                        <div id="blockedAudioList"></div>
+                        <button class="btn-small" onclick="addBlockedAudio()">+ 添加聲音限制</button>
+                    </div>
+                </div>
+
+                <!-- Visual Rules -->
+                <div class="section collapsible">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3>🎨 視覺風格限制</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="visualEnabled">
+                                啟用視覺限制
+                            </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" class="blocked-visual" value="血腥畫面"> 血腥畫面</label>
+                            <label><input type="checkbox" class="blocked-visual" value="陰暗恐怖"> 陰暗恐怖</label>
+                            <label><input type="checkbox" class="blocked-visual" value="過度閃爍"> 過度閃爍</label>
+                            <label><input type="checkbox" class="blocked-visual" value="性感暴露"> 性感暴露</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Theme Rules -->
+                <div class="section collapsible">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3>📺 主題內容限制</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="themesEnabled">
+                                啟用主題限制
+                            </label>
+                        </div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" class="blocked-theme" value="賭博遊戲"> 賭博遊戲</label>
+                            <label><input type="checkbox" class="blocked-theme" value="戀愛交往"> 戀愛交往</label>
+                            <label><input type="checkbox" class="blocked-theme" value="校園霸凌"> 校園霸凌</label>
+                            <label><input type="checkbox" class="blocked-theme" value="犯罪行為"> 犯罪行為</label>
+                            <label><input type="checkbox" class="blocked-theme" value="超自然靈異"> 超自然靈異</label>
+                            <label><input type="checkbox" class="blocked-theme" value="開箱炫富"> 開箱炫富</label>
+                            <label><input type="checkbox" class="blocked-theme" value="惡作劇整人"> 惡作劇整人</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keyword Rules -->
+                <div class="section collapsible">
+                    <div class="section-header" onclick="toggleSection(this)">
+                        <h3>🔤 關鍵字黑名單</h3>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="keywordsEnabled">
+                                啟用關鍵字過濾
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>封鎖的關鍵字（每行一個）</label>
+                            <textarea id="blockedKeywords" rows="6" placeholder="鬼&#10;靈異&#10;恐怖&#10;血腥&#10;18+"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Tab -->
+            <div class="tab-panel" id="notifications">
+                <h2>通知設定</h2>
+
+                <div class="section">
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="notificationsEnabled">
+                            啟用通知功能
+                        </label>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Telegram 通知</h3>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="telegramEnabled">
+                            啟用 Telegram 通知
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="telegramBotToken">Bot Token</label>
+                        <input type="password" id="telegramBotToken" placeholder="123456:ABC-DEF...">
+                        <span class="help-text">從 @BotFather 獲取</span>
+                    </div>
+                    <div class="form-group">
+                        <label for="telegramChatId">Chat ID</label>
+                        <input type="text" id="telegramChatId" placeholder="123456789">
+                        <span class="help-text">從 @userinfobot 獲取</span>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>通知選項</h3>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="includeScreenshot">
+                            通知中包含截圖
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="blockOnly">
+                            僅在阻擋內容時通知（不通知警告）
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates Tab -->
+            <div class="tab-panel" id="templates">
+                <h2>快速配置模板</h2>
+                <p class="help-text">選擇預設模板快速開始，之後可以自行調整</p>
+
+                <div class="templates-grid">
+                    <div class="template-card" onclick="loadTemplate('strict')">
+                        <div class="template-icon">👶</div>
+                        <h3>嚴格模式</h3>
+                        <p>適合 4-7 歲幼兒</p>
+                        <ul class="template-features">
+                            <li>✓ 只允許中文</li>
+                            <li>✓ 禁止所有暴力動作</li>
+                            <li>✓ 禁止尖叫和大叫</li>
+                            <li>✓ 極嚴格的主題限制</li>
+                        </ul>
+                        <button class="btn-secondary">使用此模板</button>
+                    </div>
+
+                    <div class="template-card" onclick="loadTemplate('relaxed')">
+                        <div class="template-icon">🧒</div>
+                        <h3>寬鬆模式</h3>
+                        <p>適合 10-12 歲兒童</p>
+                        <ul class="template-features">
+                            <li>✓ 中英文都允許</li>
+                            <li>✓ 只限制極端暴力</li>
+                            <li>✓ 多數情況僅警告</li>
+                            <li>✓ 給予更多自由度</li>
+                        </ul>
+                        <button class="btn-secondary">使用此模板</button>
+                    </div>
+
+                    <div class="template-card" onclick="loadTemplate('example')">
+                        <div class="template-icon">⚙️</div>
+                        <h3>預設配置</h3>
+                        <p>標準配置模板</p>
+                        <ul class="template-features">
+                            <li>✓ 平衡的保護設定</li>
+                            <li>✓ 適合大多數家庭</li>
+                            <li>✓ 可自行調整</li>
+                        </ul>
+                        <button class="btn-secondary">使用此模板</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions">
+            <button class="btn-primary" onclick="saveConfig()">💾 保存配置</button>
+            <button class="btn-secondary" onclick="validateConfig()">✓ 驗證配置</button>
+            <button class="btn-secondary" onclick="previewConfig()">👁️ 預覽 YAML</button>
+        </div>
+
+        <!-- Preview Modal -->
+        <div class="modal" id="previewModal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('previewModal')">&times;</span>
+                <h2>配置預覽</h2>
+                <pre id="previewYaml"></pre>
+                <button class="btn-secondary" onclick="copyToClipboard()">📋 複製到剪貼板</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+</body>
+</html>
