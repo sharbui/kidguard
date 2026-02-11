@@ -2,6 +2,8 @@
 
 > AI-powered YouTube content guardian for young children
 
+English | [繁體中文](README_ZH.md)
+
 ## Hackathon Submission
 
 **Event:** Built with Opus 4.6: The Claude Code Hackathon  
