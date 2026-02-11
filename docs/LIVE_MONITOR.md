@@ -1,22 +1,26 @@
-# 🎥 KidGuard Live Monitor - 即時監控模式
+# 🎬 KidGuard Live Monitor - 即時監控模式
 
 ## 概述
 
-Live Monitor 是 KidGuard 的即時監控模式，讓 Claude 直接使用視覺分析能力來保護兒童，**無需 API Key**。
+KidGuard Live Monitor 提供**三種監控模式**，從全自動到手動控制，讓你選擇最適合的保護方式。
 
 ---
 
-## 🚀 啟動方式
+## 🤖 模式 1：Auto Monitor（推薦）
 
-### 方法 1：雙擊啟動
-```
-start_live_monitor.bat
-```
+**智能、省錢、免人工干預**
 
-### 方法 2：命令行
-```cmd
-cd C:\projects\kidguard
-python live_monitor.py
+### ✨ 特色
+
+- ✅ **影片跳轉檢測** - 只在影片切換時才擷取截圖
+- ✅ **視窗標題提取** - 不需要 Selenium 或 OCR
+- ✅ **成本優化** - 比固定時間間隔節省 90% API 成本
+- ✅ **自動化** - 無需手動操作
+
+### 🚀 啟動方式
+
+```bash
+uv run python live_monitor_auto.py
 ```
 
 ---

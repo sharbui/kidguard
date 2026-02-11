@@ -91,12 +91,16 @@ Parents can't monitor 24/7. We need AI to help.
 - [x] Redirect to whitelisted channels
 - [x] Telegram notifications to parents
 - [x] **🆕 Parent custom rules** (language, actions, audio, themes, keywords)
+- [x] **🆕 Smart video transition detection** - Only analyzes when videos change (saves API costs)
+- [x] **🆕 Window title extraction** - Gets video info without Selenium/OCR
+- [x] **🆕 Auto monitoring mode** - Hands-free protection
 
 ### Future Roadmap
 
 - [ ] Family member profile management
 - [ ] Viewing history dashboard
 - [ ] ~~Custom filter rules~~ ✅ **DONE** - Fully configurable parent rules
+- [ ] ~~Video transition detection~~ ✅ **DONE** - Smart cost-saving analysis
 - [ ] Audio analysis (screaming, profanity detection)
 - [ ] Cross-platform support (tablet, phone)
 - [ ] Integration with router-level controls
@@ -185,6 +189,71 @@ python web_ui.py
 
 ---
 
+## 🎬 Live Monitoring Modes (NEW!)
+
+KidGuard offers **three monitoring modes** to fit different use cases:
+
+### 1. 🤖 Auto Monitor (Recommended)
+**Smart, cost-efficient, hands-free**
+
+```bash
+python live_monitor_auto.py
+```
+
+✨ **Features:**
+- **Video transition detection** - Only captures when videos change
+- **Window title extraction** - Gets video info without Selenium/OCR
+- **Cost-saving** - ~90% fewer API calls vs. fixed interval
+- **Automatic** - No manual intervention needed
+
+**How it works:**
+1. Monitors YouTube window title every 2 seconds
+2. Detects when video changes (title change)
+3. Captures screenshot + extracts video info
+4. You analyze and provide action command
+5. Repeats for next video
+
+💰 **Cost:** ~$0.01 per video transition (~0.3 TWD)
+
+---
+
+### 2. ⌨️ Manual Monitor
+**Full control, manual triggering**
+
+```bash
+python live_monitor_manual.py
+```
+
+✨ **Features:**
+- Press Enter to capture screenshot
+- Execute actions via commands
+- Best for spot-checking
+
+**Commands:**
+- `Enter` - Capture screenshot
+- `close` - Close current tab
+- `redirect` - Go to safe channel
+- `pause` - Pause video
+- `warn` - Show warning
+- `ok` - Content is safe
+
+---
+
+### 3. 🔧 Full Mode (with Face Recognition)
+**Complete protection with user identification**
+
+```bash
+python kidguard.py
+```
+
+✨ **Features:**
+- Webcam-based viewer identification
+- Age-based rule enforcement
+- Automatic intervention
+- Telegram notifications
+
+---
+
 ## 📋 Content Analysis Criteria
 
 Claude analyzes captured content for:
@@ -202,7 +271,21 @@ Claude analyzes captured content for:
 
 ## 🛠️ Installation
 
-### Option 1: Quick Start with Web UI (Recommended) 🌐
+### Prerequisites
+
+```bash
+# Using uv (recommended)
+pip install uv
+uv venv
+uv pip install -r requirements.txt
+
+# Or using pip
+pip install -r requirements.txt
+```
+
+### Option 1: Quick Start - Auto Monitor (Recommended) 🚀
+
+**Fastest way to start protecting - no configuration needed!**
 
 ```bash
 # Clone the repo
@@ -210,8 +293,18 @@ git clone https://github.com/sharbui/kidguard.git
 cd kidguard
 
 # Install dependencies
-pip install -r requirements.txt
+uv pip install -r requirements.txt
 
+# Start monitoring
+uv run python live_monitor_auto.py
+
+# Open YouTube and play videos
+# Monitor will auto-detect video changes and capture screenshots
+```
+
+### Option 2: Web UI Configuration 🌐
+
+```bash
 # Launch Web UI
 python web_ui.py
 
@@ -219,16 +312,9 @@ python web_ui.py
 # Configure settings through the friendly web interface
 ```
 
-### Option 2: Manual Configuration
+### Option 3: Full Mode (Face Recognition + Automation)
 
 ```bash
-# Clone the repo
-git clone https://github.com/sharbui/kidguard.git
-cd kidguard
-
-# Install dependencies
-pip install -r requirements.txt
-
 # Configure
 cp config/config.example.yaml config/config.yaml
 # Edit config.yaml with your settings

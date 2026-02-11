@@ -27,14 +27,54 @@ class LiveMonitor:
         self.monitoring = False
         self.screenshot_dir = Path("screenshots")
         self.screenshot_dir.mkdir(exist_ok=True)
-        self.check_interval = 10  # 每 10 秒檢查一次
+        self.check_interval = 2  # 每 2 秒檢查影片是否跳轉
         self.capture_count = 0
+        self.last_video_title = None  # 追蹤上一個影片標題
+
+    def get_youtube_window_title(self):
+        """獲取 YouTube 視窗標題"""
+        try:
+            import pygetwindow as gw
+            windows = gw.getAllTitles()
+            for title in windows:
+                if 'youtube' in title.lower() and title.strip():
+                    # 清理標題，移除瀏覽器名稱後綴
+                    # 例如："Video Title - YouTube - Google Chrome" -> "Video Title"
+                    clean_title = title
+                    for browser in [' - Google Chrome', ' - Mozilla Firefox', ' - Microsoft Edge', ' - Brave', ' - Opera']:
+                        clean_title = clean_title.replace(browser, '')
+                    clean_title = clean_title.replace(' - YouTube', '').strip()
+
+                    # 如果標題不是空的且不只是 "YouTube"，就返回
+                    if clean_title and clean_title.lower() != 'youtube':
+                        return clean_title
+        except Exception as e:
+            pass
+        return None
 
     def detect_youtube(self):
         """檢測 YouTube 是否在運行"""
         # 檢查瀏覽器進程
         browsers = ['chrome.exe', 'firefox.exe', 'msedge.exe', 'brave.exe', 'opera.exe']
 
+        # 方法1: 檢查視窗標題
+        try:
+            import pygetwindow as gw
+            windows = gw.getAllTitles()
+            for title in windows:
+                if 'youtube' in title.lower():
+                    # 找到對應的瀏覽器進程
+                    for proc in psutil.process_iter(['name']):
+                        try:
+                            if proc.info['name'] and proc.info['name'].lower() in browsers:
+                                return True, proc.info['name']
+                        except (psutil.NoSuchProcess, psutil.AccessDenied):
+                            continue
+                    return True, 'browser'
+        except Exception as e:
+            print(f"   檢測視窗失敗，使用備用方法: {e}")
+
+        # 方法2: 檢查命令行參數（備用）
         for proc in psutil.process_iter(['name', 'cmdline']):
             try:
                 # 檢查是否是瀏覽器
@@ -43,6 +83,16 @@ class LiveMonitor:
                     cmdline = proc.info.get('cmdline', [])
                     if cmdline and any('youtube.com' in str(arg).lower() for arg in cmdline):
                         return True, proc.info['name']
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+
+        # 方法3: 如果有瀏覽器在運行，假設可能在看 YouTube（最寬鬆）
+        # 這個方法會在有瀏覽器時就開始截圖，讓用戶判斷
+        for proc in psutil.process_iter(['name']):
+            try:
+                if proc.info['name'] and proc.info['name'].lower() in browsers:
+                    # 不自動返回 True，避免誤報
+                    pass
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 continue
 
@@ -224,11 +274,12 @@ class LiveMonitor:
     def start(self):
         """啟動監控"""
         print("=" * 70)
-        print("🛡️  KidGuard Live Monitor - Claude Visual Analysis Mode")
+        print("🛡️  KidGuard Live Monitor - Video Transition Detection Mode")
         print("=" * 70)
         print()
         print("監控設定:")
-        print(f"  • 檢查間隔: {self.check_interval} 秒")
+        print(f"  • 檢測模式: 影片跳轉時觸發（非固定時間間隔）")
+        print(f"  • 檢查頻率: 每 {self.check_interval} 秒檢查一次影片是否切換")
         print(f"  • 截圖保存: {self.screenshot_dir.absolute()}")
         print()
         print("可用的干預動作:")
@@ -236,6 +287,10 @@ class LiveMonitor:
         print("  • redirect - 重導向到安全頻道")
         print("  • pause    - 暫停影片")
         print("  • warn     - 顯示警告訊息")
+        print()
+        print("💡 提示:")
+        print("  • 只有在 YouTube 切換到新影片時才會觸發分析")
+        print("  • 輸入 'stop' 停止監控")
         print()
         print("🟢 監控已啟動，等待 YouTube...")
         print("   (按 Ctrl+C 停止監控)")
@@ -254,63 +309,91 @@ class LiveMonitor:
                         print(f"⚠️  偵測到 YouTube！ (瀏覽器: {browser})")
                         print("=" * 70)
                         youtube_detected = True
+                        # 重置上次的影片標題
+                        self.last_video_title = None
 
-                    # 擷取螢幕
-                    screenshot_path, video_info = self.capture_screen()
+                    # 獲取當前影片標題
+                    current_title = self.get_youtube_window_title()
 
-                    if screenshot_path:
-                        print()
+                    # 檢查影片是否切換
+                    if current_title and current_title != self.last_video_title:
+                        if self.last_video_title is not None:
+                            print()
+                            print("=" * 70)
+                            print("🎬 偵測到影片跳轉！")
+                            print(f"   上一部: {self.last_video_title[:60]}...")
+                            print(f"   新影片: {current_title[:60]}...")
+                            print("=" * 70)
+                        else:
+                            print()
+                            print("=" * 70)
+                            print("🎬 偵測到新影片")
+                            print(f"   標題: {current_title[:60]}...")
+                            print("=" * 70)
 
-                        # 顯示提取的影片資訊
-                        if video_info and video_info.get('extracted'):
-                            print("📺 影片資訊:")
-                            if video_info.get('title'):
-                                print(f"   標題: {video_info['title']}")
-                            if video_info.get('channel'):
-                                print(f"   頻道: {video_info['channel']}")
+                        # 更新追蹤的標題
+                        self.last_video_title = current_title
+
+                        # 擷取螢幕
+                        screenshot_path, video_info = self.capture_screen()
+
+                        if screenshot_path:
                             print()
 
-                        print("📋 截圖已保存，請將圖片給 Claude 分析：")
-                        print(f"   路徑: {screenshot_path.absolute()}")
-                        print()
-                        print("🤖 Claude 分析後，輸入指令執行動作：")
-                        print("   - 'close' = 關閉分頁")
-                        print("   - 'redirect' = 重導向安全頻道")
-                        print("   - 'pause' = 暫停影片")
-                        print("   - 'warn' = 顯示警告")
-                        print("   - 'ok' = 內容安全，繼續監控")
-                        print("   - 'stop' = 停止監控")
-                        print()
+                            # 顯示提取的影片資訊
+                            if video_info and video_info.get('extracted'):
+                                print("📺 影片資訊:")
+                                if video_info.get('title'):
+                                    print(f"   標題: {video_info['title']}")
+                                if video_info.get('channel'):
+                                    print(f"   頻道: {video_info['channel']}")
+                                print()
 
-                        # 等待用戶/Claude 的指令
-                        try:
-                            command = input("👉 請輸入指令: ").strip().lower()
+                            print("📋 截圖已保存，請將圖片給 Claude 分析：")
+                            print(f"   路徑: {screenshot_path.absolute()}")
+                            print()
+                            print("🤖 Claude 分析後，輸入指令執行動作：")
+                            print("   - 'close' = 關閉分頁")
+                            print("   - 'redirect' = 重導向安全頻道")
+                            print("   - 'pause' = 暫停影片")
+                            print("   - 'warn' = 顯示警告")
+                            print("   - 'ok' = 內容安全，繼續監控")
+                            print("   - 'stop' = 停止監控")
+                            print()
 
-                            if command == 'stop':
-                                print("🛑 停止監控")
-                                break
-                            elif command == 'ok':
-                                print("✅ 內容安全，繼續監控...")
-                            elif command in ['close', 'redirect', 'pause', 'warn']:
-                                self.execute_action(command)
-                            else:
-                                print(f"⚠️  未知指令: {command}")
+                            # 等待用戶/Claude 的指令
+                            try:
+                                command = input("👉 請輸入指令: ").strip().lower()
 
-                        except EOFError:
-                            # 如果在非互動環境中運行
-                            print("⚠️  非互動模式，自動繼續...")
+                                if command == 'stop':
+                                    print("🛑 停止監控")
+                                    break
+                                elif command == 'ok':
+                                    print("✅ 內容安全，繼續監控...")
+                                elif command in ['close', 'redirect', 'pause', 'warn']:
+                                    self.execute_action(command)
+                                    # 執行動作後，重置標題追蹤
+                                    if command in ['close', 'redirect']:
+                                        self.last_video_title = None
+                                else:
+                                    print(f"⚠️  未知指令: {command}")
 
-                        print()
-                        print(f"⏳ 等待 {self.check_interval} 秒後繼續監控...")
-                        print("-" * 70)
-                        print()
+                            except EOFError:
+                                # 如果在非互動環境中運行
+                                print("⚠️  非互動模式，自動繼續...")
+
+                            print()
+                            print("⏳ 繼續監控影片跳轉...")
+                            print("-" * 70)
+                            print()
 
                 else:
                     if youtube_detected:
                         print("✓ YouTube 已關閉，繼續待機...")
                         youtube_detected = False
+                        self.last_video_title = None
 
-                # 等待下次檢查
+                # 等待下次檢查（檢查影片是否切換）
                 time.sleep(self.check_interval)
 
         except KeyboardInterrupt:
