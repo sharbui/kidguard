@@ -258,8 +258,8 @@ const translations = {
     }
 };
 
-// Current language (default: Traditional Chinese)
-let currentLang = localStorage.getItem('kidguard-lang') || 'zh-TW';
+// Current language (default: English)
+let currentLang = localStorage.getItem('kidguard-lang') || 'en';
 
 // Get translation
 function t(key) {
