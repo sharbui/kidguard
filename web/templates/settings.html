@@ -10,22 +10,27 @@
     <div class="container">
         <!-- Header -->
         <header class="header">
-            <h1>🛡️ KidGuard 家長控制面板</h1>
-            <p class="subtitle">保護您的孩子免受不當內容影響</p>
+            <div class="header-content">
+                <div>
+                    <h1 data-i18n="app.title">🛡️ KidGuard 家長控制面板</h1>
+                    <p class="subtitle" data-i18n="app.subtitle">保護您的孩子免受不當內容影響</p>
+                </div>
+                <button class="lang-toggle" id="langToggle" onclick="toggleLanguage()">EN</button>
+            </div>
         </header>
 
         <!-- Status Bar -->
         <div class="status-bar" id="statusBar">
-            <span class="status-text" id="statusText">準備就緒</span>
+            <span class="status-text" id="statusText" data-i18n="status.ready">準備就緒</span>
         </div>
 
         <!-- Tab Navigation -->
         <nav class="tabs">
-            <button class="tab-btn active" data-tab="basic">🔧 基本設定</button>
-            <button class="tab-btn" data-tab="family">👨‍👩‍👧‍👦 家庭成員</button>
-            <button class="tab-btn" data-tab="custom-rules">🎯 自定義規則</button>
-            <button class="tab-btn" data-tab="notifications">📱 通知設定</button>
-            <button class="tab-btn" data-tab="templates">📋 快速模板</button>
+            <button class="tab-btn active" data-tab="basic"><span data-i18n="tab.basic">🔧 基本設定</span></button>
+            <button class="tab-btn" data-tab="family"><span data-i18n="tab.family">👨‍👩‍👧‍👦 家庭成員</span></button>
+            <button class="tab-btn" data-tab="custom-rules"><span data-i18n="tab.rules">🎯 自定義規則</span></button>
+            <button class="tab-btn" data-tab="notifications"><span data-i18n="tab.notifications">📱 通知設定</span></button>
+            <button class="tab-btn" data-tab="templates"><span data-i18n="tab.templates">📋 快速模板</span></button>
         </nav>
 
         <!-- Tab Content -->
@@ -355,6 +360,14 @@
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
     <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+    <script>
+        // Language toggle function
+        function toggleLanguage() {
+            const newLang = currentLang === 'zh-TW' ? 'en' : 'zh-TW';
+            switchLanguage(newLang);
+        }
+    </script>
 </body>
 </html>

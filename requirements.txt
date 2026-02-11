@@ -43,3 +43,8 @@ pytest-asyncio>=0.21.0
 # Live Monitor
 pyautogui>=0.9.54
 pyperclip>=1.8.2
+
+# OCR (Optional - for extracting video titles and channel names)
+# pytesseract>=0.3.10
+# Note: Also requires Tesseract OCR binary to be installed
+# See docs/OCR_SETUP.md for installation instructions

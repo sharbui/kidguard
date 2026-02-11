@@ -13,6 +13,12 @@ from datetime import datetime
 import mss
 import mss.tools
 from PIL import Image
+import re
+try:
+    import pytesseract
+    OCR_AVAILABLE = True
+except ImportError:
+    OCR_AVAILABLE = False
 
 class LiveMonitor:
     """即時監控系統"""
@@ -42,6 +48,53 @@ class LiveMonitor:
 
         return False, None
 
+    def extract_video_info(self, screenshot_path):
+        """從截圖中提取影片標題和頻道名稱"""
+        info = {
+            'title': None,
+            'channel': None,
+            'extracted': False
+        }
+
+        if not OCR_AVAILABLE:
+            print("   ⚠️  OCR 不可用（需要安裝 pytesseract）")
+            return info
+
+        try:
+            # 讀取截圖
+            img = Image.open(screenshot_path)
+            width, height = img.size
+
+            # YouTube 標題通常在上方 20% 的區域
+            title_region = img.crop((0, 0, width, int(height * 0.2)))
+
+            # 頻道名稱通常在標題下方
+            channel_region = img.crop((0, int(height * 0.15), width, int(height * 0.3)))
+
+            # 使用 OCR 提取文字
+            title_text = pytesseract.image_to_string(title_region, lang='chi_tra+eng')
+            channel_text = pytesseract.image_to_string(channel_region, lang='chi_tra+eng')
+
+            # 清理文字
+            title_text = ' '.join(title_text.split()).strip()
+            channel_text = ' '.join(channel_text.split()).strip()
+
+            if title_text:
+                # 移除常見的 YouTube UI 元素
+                title_text = re.sub(r'(YouTube|訂閱|Subscribe|分享|Share)', '', title_text)
+                info['title'] = title_text[:100]  # 限制長度
+
+            if channel_text:
+                channel_text = re.sub(r'(訂閱|Subscribe|已訂閱|Subscribed)', '', channel_text)
+                info['channel'] = channel_text[:50]
+
+            info['extracted'] = bool(info['title'] or info['channel'])
+
+        except Exception as e:
+            print(f"   ⚠️  提取影片資訊失敗: {e}")
+
+        return info
+
     def capture_screen(self):
         """擷取螢幕截圖"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -66,11 +119,15 @@ class LiveMonitor:
                 img.save(filepath, optimize=True, quality=85)
 
             self.capture_count += 1
-            return filepath
+
+            # 提取影片資訊
+            video_info = self.extract_video_info(filepath)
+
+            return filepath, video_info
 
         except Exception as e:
             print(f"❌ 擷取失敗: {e}")
-            return None
+            return None, None
 
     def close_browser_tab(self):
         """嘗試關閉當前瀏覽器分頁"""
@@ -199,10 +256,20 @@ class LiveMonitor:
                         youtube_detected = True
 
                     # 擷取螢幕
-                    screenshot_path = self.capture_screen()
+                    screenshot_path, video_info = self.capture_screen()
 
                     if screenshot_path:
                         print()
+
+                        # 顯示提取的影片資訊
+                        if video_info and video_info.get('extracted'):
+                            print("📺 影片資訊:")
+                            if video_info.get('title'):
+                                print(f"   標題: {video_info['title']}")
+                            if video_info.get('channel'):
+                                print(f"   頻道: {video_info['channel']}")
+                            print()
+
                         print("📋 截圖已保存，請將圖片給 Claude 分析：")
                         print(f"   路徑: {screenshot_path.absolute()}")
                         print()
