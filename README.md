@@ -24,6 +24,28 @@ Your 5-year-old sits down at the computer. Within seconds, they've opened YouTub
 
 Parents can't monitor 24/7. We need AI to help.
 
+### A Parent's Reality
+
+*"Sure, you might say: just don't let kids touch screens or YouTube — problem solved!"*
+
+But here's my reality as a father of three:
+
+**My first child** grew up without TV or tablets until elementary school. Just books. By kindergarten, he was reading at a 4th-grade level.
+
+**Then came child #2, and #3.** Suddenly it's just Mom and Dad managing three kids. We can't give each one the same one-on-one attention. We can't even catch our breath.
+
+**That's when we needed help.** Not to replace parenting, but to **extend our reach** when we physically can't be everywhere at once.
+
+This is where AI can truly help families:
+- **Not just AdGuard** or simple blocklists
+- **Intelligent, context-aware protection** that understands what kids are actually watching
+- **Low-cost, embedded assistance** that doesn't require a computer science degree
+- **A safety net** for when parents are cooking dinner, helping with homework, or just trying to survive the day
+
+Many people say they're afraid to have kids, or don't know how to raise them. What if AI could make parenting more manageable? What if technology could be a **guardian**, not just a babysitter?
+
+That's the idea behind KidGuard.
+
 ---
 
 ## 💡 The Solution
