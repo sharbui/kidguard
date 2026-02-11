@@ -1,0 +1,59 @@
+# KidGuard Configuration - Keyword Filtering Only (No AI API)
+# 關鍵字過濾模式（不使用 AI API，節省成本）
+
+# Content analysis settings
+analysis:
+  # 停用 AI API 分析，只使用關鍵字過濾
+  use_ai_analysis: false
+
+  # 關鍵字過濾設定
+  keyword_filter:
+    # 標題或描述包含這些關鍵字時封鎖
+    blocked_keywords:
+      # 恐怖/驚悚
+      - "鬼"
+      - "靈異"
+      - "恐怖"
+      - "嚇人"
+      - "殭屍"
+      - "血腥"
+      - "殺人"
+
+      # 暴力
+      - "暴力"
+      - "打架"
+      - "槍戰"
+      - "炸彈"
+
+      # 賭博
+      - "賭博"
+      - "賭場"
+      - "老虎機"
+
+      # 成人內容
+      - "18+"
+      - "成人"
+      - "色情"
+
+      # 其他不當內容
+      - "詐騙"
+      - "毒品"
+      - "自殺"
+
+    # 頻道名稱包含這些關鍵字時封鎖
+    blocked_channels:
+      - "恐怖"
+      - "靈異"
+      - "鬼故事"
+      - "成人"
+      - "賭博"
+
+# Safe channels (YouTube channel IDs)
+# 安全頻道白名單
+safe_channels:
+  - id: "UCX6OQ3DkcsbYNE6H8uQQuVA"
+    name: "MrBeast"
+  - id: "UC295-Dw_tDNtZXFeAPAQKEw"
+    name: "Cocomelon"
+  - id: "UCkQO3QsgTpNTsOw6ujimT5Q"
+    name: "Blippi"

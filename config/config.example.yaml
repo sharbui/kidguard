@@ -52,6 +52,10 @@ safe_channels:
 
 # Content analysis settings
 analysis:
+  # Enable AI API analysis (uses Claude Vision API)
+  # If disabled, only uses local keyword filtering (saves API costs)
+  use_ai_analysis: true  # true = AI analysis | false = keyword filtering only
+
   # Categories to block
   block_categories:
     - violence
@@ -68,6 +72,24 @@ analysis:
 
   # Confidence threshold (0-1)
   confidence_threshold: 0.7
+
+  # Keyword filtering (used when use_ai_analysis = false, or as pre-filter)
+  keyword_filter:
+    # Block if title/description contains these keywords
+    blocked_keywords:
+      - "鬼"
+      - "靈異"
+      - "恐怖"
+      - "血腥"
+      - "暴力"
+      - "賭博"
+      - "18+"
+      - "成人"
+    # Block if channel name contains these keywords
+    blocked_channels:
+      - "恐怖"
+      - "靈異"
+      - "成人"
 
   # ===== 家長自定義規則 (Parent Custom Rules) =====
   custom_rules:

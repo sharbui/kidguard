@@ -204,16 +204,21 @@ python live_monitor_auto.py
 - **Video transition detection** - Only captures when videos change
 - **Window title extraction** - Gets video info without Selenium/OCR
 - **Cost-saving** - ~90% fewer API calls vs. fixed interval
+- **Dual analysis modes** - AI analysis OR keyword filtering
 - **Automatic** - No manual intervention needed
 
 **How it works:**
 1. Monitors YouTube window title every 2 seconds
 2. Detects when video changes (title change)
-3. Captures screenshot + extracts video info
-4. You analyze and provide action command
+3. Captures screenshot + extracts video info (title, channel, description)
+4. **Choose analysis mode:**
+   - **AI Mode** (use_ai_analysis: true): Claude analyzes screenshot → You execute recommended action
+   - **Keyword Mode** (use_ai_analysis: false): Keyword filtering → Auto-suggest action
 5. Repeats for next video
 
-💰 **Cost:** ~$0.01 per video transition (~0.3 TWD)
+💰 **Cost:**
+- **AI Mode:** ~$0.01 per video (~0.3 TWD)
+- **Keyword Mode:** $0 (completely free!)
 
 ---
 
@@ -251,6 +256,94 @@ python kidguard.py
 - Age-based rule enforcement
 - Automatic intervention
 - Telegram notifications
+
+---
+
+## 🎯 Analysis Modes: AI vs. Keyword Filtering
+
+KidGuard supports **two analysis modes** - choose based on your needs and budget:
+
+### Mode 1: AI Analysis (use_ai_analysis: true)
+
+**When to use:**
+- Need deep content understanding
+- Detect subtle inappropriate content
+- Analyze visual elements (violence, horror, etc.)
+- Best accuracy
+
+**How it works:**
+1. Extract video title + channel from window
+2. Capture screenshot
+3. Send to Claude Vision API for analysis
+4. Claude provides detailed assessment + recommended action
+5. You confirm and execute
+
+**Cost:** ~$0.01 per video (~0.3 TWD)
+
+**Configuration:**
+```yaml
+# config/config.yaml
+analysis:
+  use_ai_analysis: true
+
+claude:
+  api_key: "your-api-key"
+```
+
+---
+
+### Mode 2: Keyword Filtering (use_ai_analysis: false)
+
+**When to use:**
+- Budget-conscious (zero API costs)
+- Simple blacklist filtering is enough
+- Block obvious inappropriate content
+- Fast decision making
+
+**How it works:**
+1. Extract video title + channel from window
+2. Check against keyword blacklist
+3. Auto-suggest action if match found
+4. You confirm and execute
+5. Screenshot saved for records (optional)
+
+**Cost:** $0 (completely free!)
+
+**Configuration:**
+```yaml
+# config/config.yaml
+analysis:
+  use_ai_analysis: false
+
+  keyword_filter:
+    blocked_keywords:
+      - "鬼"
+      - "恐怖"
+      - "暴力"
+      # ... more keywords
+    blocked_channels:
+      - "恐怖"
+      - "靈異"
+```
+
+---
+
+### Comparison
+
+| Feature | AI Analysis | Keyword Filtering |
+|---------|-------------|-------------------|
+| **Cost** | ~$0.01/video | $0 (Free) |
+| **Accuracy** | ⭐⭐⭐⭐⭐ Very High | ⭐⭐⭐ Good |
+| **Visual Analysis** | ✅ Yes | ❌ No |
+| **Context Understanding** | ✅ Yes | ❌ No |
+| **Speed** | ~2-3 seconds | Instant |
+| **Setup** | Need API key | Just keywords |
+| **Best for** | Deep protection | Budget-conscious |
+
+**💡 Recommendation:**
+- **Start with Keyword Mode** to save costs
+- **Upgrade to AI Mode** when you need deeper analysis
+- **Hybrid approach:** Use keyword as pre-filter, AI for edge cases
 
 ---
 

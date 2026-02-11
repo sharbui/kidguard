@@ -1,0 +1,54 @@
+# KidGuard Configuration - AI Analysis Mode
+# AI 分析模式（使用 Claude Vision API 進行深度內容分析）
+
+# Claude API
+claude:
+  api_key: "your-claude-api-key-here"
+  model: "claude-sonnet-4-5"  # or claude-opus-4-5 for best accuracy
+
+# Content analysis settings
+analysis:
+  # 啟用 AI API 分析（更準確但需要 API 成本）
+  use_ai_analysis: true
+
+  # Categories to block
+  block_categories:
+    - violence
+    - horror
+    - adult
+    - drugs
+    - gambling
+
+  # Categories to warn (log but don't block)
+  warn_categories:
+    - excessive_consumerism
+    - clickbait
+    - loud_content
+
+  # Confidence threshold (0-1)
+  confidence_threshold: 0.7
+
+  # 關鍵字過濾（作為預過濾，在 AI 分析前先檢查）
+  keyword_filter:
+    blocked_keywords:
+      - "鬼"
+      - "靈異"
+      - "恐怖"
+      - "血腥"
+      - "暴力"
+      - "賭博"
+      - "18+"
+      - "成人"
+    blocked_channels:
+      - "恐怖"
+      - "靈異"
+      - "成人"
+
+# Safe channels (YouTube channel IDs)
+safe_channels:
+  - id: "UCX6OQ3DkcsbYNE6H8uQQuVA"
+    name: "MrBeast"
+  - id: "UC295-Dw_tDNtZXFeAPAQKEw"
+    name: "Cocomelon"
+  - id: "UCkQO3QsgTpNTsOw6ujimT5Q"
+    name: "Blippi"
